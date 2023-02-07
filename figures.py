@@ -1,6 +1,4 @@
-# import matplotlib.pyplot as plt
 import plotly.express as px
-
 from m_code_generator import McodeTdomain
 
 
@@ -12,4 +10,4 @@ def get_m_code_t_domain_figure(m_code_t_domain: McodeTdomain):
     fig = px.line(df, x=x_title, y=y_title,
                   title="M-последовательность во временной области",
                   height=500, width=1400)
-    fig.show()
+    return fig
