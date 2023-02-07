@@ -4,11 +4,14 @@
 
 ## Запуск приложения
 - Установка виртуального окружения
+
+Для настройки виртуального окружения рекомендуется установить менеджер пакетов
+`poetry`. Инструкцию по установке см на [Официальном сайте](https://python-poetry.org/docs/#installing-with-the-official-installer)
+
 ```
-python3 -m venv venv
-source venv/bin/activate
+poetry shell
 ```
-- Установка зависимостей `pip3 install -r requirements.txt`
+- Установка зависимостей `poetry install`
 - Запуск приложения `python3 main.py`
 
 ## Блоки программы
