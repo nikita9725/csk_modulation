@@ -1,10 +1,21 @@
-from m_code_generator import McodeGenerator
-from plots import get_m_code_t_domain_figure
+from dash import Dash, html
+
+from utils import HtmlDivRegister
+
+
+def init_views():
+    """Функция инициализирует модуль views и регистрирует их с помощью
+    декораторов таких как HtmlDivRegister"""
+    __import__('views')
+
+
+def init_app():
+    init_views()
 
 
 if __name__ == '__main__':
-    m_code_gen = McodeGenerator()
-    m_code = m_code_gen.generate_m_code()
-    m_code_t_domain = m_code_gen.get_m_code_in_t_domain()
+    app = Dash(__name__)
+    init_app()
+    app.layout = html.Div(HtmlDivRegister().divs)
 
-    get_m_code_t_domain_figure(m_code_t_domain)
+    app.run_server(debug=True)
