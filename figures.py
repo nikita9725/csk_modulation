@@ -1,5 +1,5 @@
 import plotly.express as px
-from m_code_generator import McodeTdomain
+from signal_processing.m_code_generator import McodeTdomain
 
 
 def get_m_code_t_domain_figure(m_code_t_domain: McodeTdomain):

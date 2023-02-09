@@ -1,6 +1,6 @@
 from dash import dcc
 
-from m_code_generator import McodeGenerator
+from signal_processing.m_code_generator import McodeGenerator
 from figures import get_m_code_t_domain_figure
 from utils import HtmlDivRegister
 
