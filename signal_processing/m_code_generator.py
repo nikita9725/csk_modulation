@@ -16,6 +16,10 @@ class McodeTdomain:
     tau_chip_exp: float
     t_period: float
 
+    @property
+    def expans(self) -> int:
+        return int(self.tau_chip/self.tau_chip_exp)
+
     def __repr__(self):
         return (f'М-последовательность во временной области со следующими '
                 f'параметрами: \n'
@@ -54,7 +58,7 @@ class McodeGenerator:
         return m_code
 
     @cache
-    def get_m_code_in_t_domain(self) -> McodeTdomain:
+    def get_m_code_t_domain(self) -> McodeTdomain:
         m_code = self.generate_m_code()
         tau_chip = self.t_period / len(m_code)
         tau_chip_exp = tau_chip / self.expans
