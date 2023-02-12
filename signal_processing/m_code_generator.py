@@ -1,5 +1,4 @@
 import numpy as np
-from bitarray import bitarray
 from dataclasses import dataclass
 from math import ceil
 from functools import cache
@@ -41,14 +40,14 @@ class McodeGenerator:
 
     @cache
     def generate_m_code(self) -> np.array:
-        start_bits = bitarray(self.start_bits)
+        start_bits = np.array(self.start_bits, dtype='int')
         m_code = np.array([], dtype='int')
 
         for _ in range(self.m):
             # TODO: Автоматизировать индексы
             mod2_sum = start_bits[4] ^ start_bits[8]
 
-            start_bits >>= 1
+            start_bits = np.roll(start_bits, 1)
             start_bits[0] = mod2_sum
             m_code = np.append(m_code, start_bits[6])
 

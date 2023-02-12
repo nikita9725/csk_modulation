@@ -8,7 +8,6 @@ packages = [{include = "csk_modulation"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-bitarray = "^2.7.0"
 numpy = "^1.24.2"
 cufflinks = "^0.17.3"
 plotly = "^5.13.0"
