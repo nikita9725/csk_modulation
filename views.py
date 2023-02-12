@@ -1,7 +1,6 @@
 from dash import dcc
 
-from signal_processing.m_code_generator import McodeGenerator
-from signal_processing.csk_modulator import CskModulator
+from signal_processing import McodeGenerator, CskModulator
 from figures import (
     get_m_code_t_domain_figure,
     get_csk_code_t_domain_figure,
