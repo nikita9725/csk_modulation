@@ -9,20 +9,49 @@ from signal_processing.m_code_generator import McodeTdomain
 class CskSignalTdomain:
     modulated_code: np.array
     m_code: np.array
-    m_code_repeated: np.array
-    m_code_repeated_exp: np.array
+    msg_bits: np.array
+    m_code_exp: np.array
+    msg_bits_exp: np.array
+    msg_bits_count: int
     modulated_code_exp: np.array
     t_arr: np.array
 
     @property
-    def symbols_exp(self) -> np.array:
-        demod_arr = np.abs(
+    def expans(self) -> int:
+        return int(len(self.m_code_exp) / len(self.m_code))
+
+    @property
+    def demodulated_msg_bits_exp(self) -> np.array:
+        cor_arr = np.array([], dtype='float')
+        for shift in range(len(self.m_code)):
+            cor_arr = np.append(cor_arr, self._get_corr(shift))
+
+        code_offset = int(np.where(cor_arr == np.max(cor_arr))[0])
+        message = self._get_msg_from_offset(code_offset)
+        msg_bit_expans = int(np.ceil(len(self.m_code) / len(message)))
+        message = np.repeat(message, self.expans * msg_bit_expans)
+
+        return message[:len(self.m_code_exp)]
+
+    def _get_msg_from_offset(self, offset: int) -> np.array:
+        msg_bits = np.array([int(bit) for bit in
+                             bin(offset).replace('0b', '')],
+                            dtype='int')
+        if msg_bits.shape[0] < self.msg_bits_count:
+            msg_bits =np.insert(
+                msg_bits,
+                *(0 for _ in range((self.msg_bits_count-len(msg_bits)) + 1))
+            )
+        return msg_bits
+
+    def _get_corr(self, shift: int):
+        corr_arr = np.abs(
             ifftshift(
-                fftshift(self.m_code_repeated_exp) *
+                fftshift(np.roll(self.m_code_exp, shift * self.expans)) *
                 fftshift(self.modulated_code_exp)
             )
         )
-        return demod_arr / max(demod_arr)
+        return np.sum(corr_arr)
 
 
 class CskModulator:
@@ -36,27 +65,19 @@ class CskModulator:
 
 
     def modulate(self, message):
-        # TODO: Сделать валидацию сообщения. Написать тест для модуляции
         code_arr = self.code.m_code
-
-        mod_arr = np.array([], dtype='int')
-        for symb in message:
-            mod_arr = np.append(
-                mod_arr,
-                [
-                    code_arr[mod(m-symb, len(code_arr))]
-                    for m in range(len(code_arr))
-                ]
-            )
+        code_offset = int(''.join(str(bit) for bit in message), 2)
+        mod_arr = np.array([code_arr[mod(m-code_offset, len(code_arr))]
+                            for m in range(len(code_arr))], dtype='int')
         return mod_arr
 
     def modulate_t_domain(self, message) -> CskSignalTdomain:
+        msg_bits = self._get_message_bits(message)
         mod_arr = self.modulate(message)
         mod_arr = np.array(mod_arr.copy(), dtype='float')
         expans = self.code.expans
 
-        m_code_arr_rep = np.tile(self.code.m_code, len(message))
-        m_code_arr_rep_exp = np.repeat(m_code_arr_rep, expans)
+        msg_bits_exp = np.repeat(msg_bits, expans)
         mod_arr_exp = np.repeat(mod_arr, expans)
         mod_arr_exp *= np.cos(100e6 * 2 * np.pi)
 
@@ -68,10 +89,18 @@ class CskModulator:
 
         return CskSignalTdomain(modulated_code=mod_arr,
                                 m_code=self.code.m_code,
-                                m_code_repeated=m_code_arr_rep,
-                                m_code_repeated_exp=m_code_arr_rep_exp,
+                                m_code_exp=self.code.m_code_exp,
+                                msg_bits=msg_bits,
+                                msg_bits_exp=msg_bits_exp,
+                                msg_bits_count=self.code.n,
                                 modulated_code_exp=mod_arr_exp,
                                 t_arr=t_arr)
 
-    def add_noise(self):
-        pass
+    def _get_message_bits(self, message) -> np.array:
+        msg_bit_expans = int(np.ceil(len(self.code.m_code) / len(message)))
+
+        message_bits = np.array([], dtype='int')
+        for bit in message:
+            message_bits = np.append(message_bits,
+                                     np.repeat([bit], msg_bit_expans))
+        return message_bits[:len(self.code.m_code)]
