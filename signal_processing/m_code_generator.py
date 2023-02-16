@@ -15,6 +15,7 @@ class McodeTdomain:
     tau_chip: float
     tau_chip_exp: float
     t_period: float
+    n: int
 
     @property
     def expans(self) -> int:
@@ -40,7 +41,7 @@ class McodeGenerator:
         self.n = len(self.start_bits)
 
         # Максимальная длина последовательности
-        self.m = 2 ** self.n - 1
+        self.m = 2 ** self.n
 
     @cache
     def generate_m_code(self) -> np.array:
@@ -75,5 +76,6 @@ class McodeGenerator:
             t_arr_exp=t_arr_exp,
             tau_chip=tau_chip,
             tau_chip_exp=tau_chip_exp,
-            t_period=self.t_period
+            t_period=self.t_period,
+            n=self.n
         )
