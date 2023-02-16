@@ -62,7 +62,7 @@ class CskModulator:
         # Кол-во чипов последовательности
         # Маппинг номера символа и сдвига
         self.code = code_t_domain
-
+        self.snr_db = snr_db
 
     def modulate(self, message):
         code_arr = self.code.m_code
@@ -80,6 +80,7 @@ class CskModulator:
         msg_bits_exp = np.repeat(msg_bits, expans)
         mod_arr_exp = np.repeat(mod_arr, expans)
         mod_arr_exp *= np.cos(100e6 * 2 * np.pi)
+        mod_arr_exp = self._add_noise(mod_arr_exp)
 
         tau_chip_exp = self.code.tau_chip / expans
 
@@ -104,3 +105,13 @@ class CskModulator:
             message_bits = np.append(message_bits,
                                      np.repeat([bit], msg_bit_expans))
         return message_bits[:len(self.code.m_code)]
+
+    def _add_noise(self, signal: np.array) -> np.array:
+        # TODO: подумать о выносе данного метода в другое место
+        signal_amp = 10 ** (self.snr_db / 20)
+        signal = signal_amp * signal
+        noise = np.random.normal(0, 1, len(signal))
+        noisy_signal = signal + noise
+        return noisy_signal
+
+
