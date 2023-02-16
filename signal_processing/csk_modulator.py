@@ -62,12 +62,7 @@ class CskSignalTdomain:
 
 
 class CskModulator:
-    def __init__(self, code_t_domain: McodeTdomain):
-        # Начальные параметры:
-        # Частота колебаний
-        # Кол-во модулируемых бит
-        # Кол-во чипов последовательности
-        # Маппинг номера символа и сдвига
+    def __init__(self, code_t_domain: McodeTdomain, snr_db: float):
         self.code = code_t_domain
         self.snr_db = snr_db
 
