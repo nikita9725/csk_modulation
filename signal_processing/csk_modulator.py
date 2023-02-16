@@ -38,9 +38,16 @@ class CskSignalTdomain:
                              bin(offset).replace('0b', '')],
                             dtype='int')
         if msg_bits.shape[0] < self.msg_bits_count:
-            msg_bits =np.insert(
+            insert_bits_count = self.msg_bits_count - msg_bits.shape[0] + 1
+
+            # Данное условие позволяет избежать ошибок при низком отношении
+            # сигнал-шум.
+            if insert_bits_count > 3:
+                insert_bits_count = 3
+
+            msg_bits = np.insert(
                 msg_bits,
-                *(0 for _ in range((self.msg_bits_count-len(msg_bits)) + 1))
+                *(0 for _ in range(insert_bits_count))
             )
         return msg_bits
 
