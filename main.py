@@ -1,6 +1,6 @@
 from dash import Dash, html
 
-from utils import HtmlDivRegister
+from utils import HtmlDivRegister, AppContainer
 
 
 def init_views():
@@ -9,13 +9,14 @@ def init_views():
     __import__('views')
 
 
-def init_app():
+def init_app(app: Dash):
+    AppContainer(app)
     init_views()
 
 
 if __name__ == '__main__':
     app = Dash(__name__)
-    init_app()
+    init_app(app)
     app.layout = html.Div(HtmlDivRegister().divs)
 
     app.run_server(debug=True)

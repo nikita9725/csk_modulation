@@ -1,3 +1,7 @@
+from typing import Optional
+from dash import Dash
+
+
 class SingletonMeta(type):
     _instances = {}
 
@@ -16,3 +20,8 @@ class HtmlDivRegister(metaclass=SingletonMeta):
         def inner(*args, **kwargs):
             self.divs.append(func(*args, **kwargs))
         return inner()
+
+
+class AppContainer(metaclass=SingletonMeta):
+    def __init__(self, app: Optional[Dash] = None):
+        self.app = app
