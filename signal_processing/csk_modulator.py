@@ -38,9 +38,16 @@ class CskSignalTdomain:
                              bin(offset).replace('0b', '')],
                             dtype='int')
         if msg_bits.shape[0] < self.msg_bits_count:
-            msg_bits =np.insert(
+            insert_bits_count = self.msg_bits_count - msg_bits.shape[0] + 1
+
+            # Данное условие позволяет избежать ошибок при низком отношении
+            # сигнал-шум.
+            if insert_bits_count > 3:
+                insert_bits_count = 3
+
+            msg_bits = np.insert(
                 msg_bits,
-                *(0 for _ in range((self.msg_bits_count-len(msg_bits)) + 1))
+                *(0 for _ in range(insert_bits_count))
             )
         return msg_bits
 
@@ -55,14 +62,9 @@ class CskSignalTdomain:
 
 
 class CskModulator:
-    def __init__(self, code_t_domain: McodeTdomain):
-        # Начальные параметры:
-        # Частота колебаний
-        # Кол-во модулируемых бит
-        # Кол-во чипов последовательности
-        # Маппинг номера символа и сдвига
+    def __init__(self, code_t_domain: McodeTdomain, snr_db: float):
         self.code = code_t_domain
-
+        self.snr_db = snr_db
 
     def modulate(self, message):
         code_arr = self.code.m_code
@@ -80,6 +82,7 @@ class CskModulator:
         msg_bits_exp = np.repeat(msg_bits, expans)
         mod_arr_exp = np.repeat(mod_arr, expans)
         mod_arr_exp *= np.cos(100e6 * 2 * np.pi)
+        mod_arr_exp = self._add_noise(mod_arr_exp)
 
         tau_chip_exp = self.code.tau_chip / expans
 
@@ -104,3 +107,13 @@ class CskModulator:
             message_bits = np.append(message_bits,
                                      np.repeat([bit], msg_bit_expans))
         return message_bits[:len(self.code.m_code)]
+
+    def _add_noise(self, signal: np.array) -> np.array:
+        # TODO: подумать о выносе данного метода в другое место
+        signal_amp = 10 ** (self.snr_db / 20)
+        signal = signal_amp * signal
+        noise = np.random.normal(0, 1, len(signal))
+        noisy_signal = signal + noise
+        return noisy_signal
+
+
