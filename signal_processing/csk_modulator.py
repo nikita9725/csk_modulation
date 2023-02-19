@@ -49,16 +49,13 @@ class CskSignalTdomain:
                              bin(offset).replace('0b', '')],
                             dtype='int')
         if msg_bits.shape[0] < self.msg_bits_count:
-            insert_bits_count = self.msg_bits_count - msg_bits.shape[0] + 1
 
-            # Данное условие позволяет избежать ошибок при низком отношении
-            # сигнал-шум.
-            if insert_bits_count > 3:
-                insert_bits_count = 3
+            insert_bits_count = self.msg_bits_count - msg_bits.shape[0]
 
             msg_bits = np.insert(
-                msg_bits,
-                *(0 for _ in range(insert_bits_count))
+                arr=msg_bits,
+                obj=0,
+                values=[0 for _ in range(insert_bits_count)],
             )
         return msg_bits
 
@@ -107,7 +104,7 @@ class CskModulator:
                                 m_code_exp=self.code.m_code_exp,
                                 msg_bits=msg_bits,
                                 msg_bits_exp=msg_bits_exp,
-                                msg_bits_count=self.code.n,
+                                msg_bits_count=len(message),
                                 modulated_code_exp=mod_arr_exp,
                                 t_arr=t_arr)
 
