@@ -7,6 +7,7 @@ from signal_processing.m_code_generator import McodeTdomain
 
 @dataclass
 class CskSignalTdomain:
+    input_msg_bits: np.array
     modulated_code: np.array
     m_code: np.array
     msg_bits: np.array
@@ -21,15 +22,25 @@ class CskSignalTdomain:
         return int(len(self.m_code_exp) / len(self.m_code))
 
     @property
-    def demodulated_msg_bits_exp(self) -> np.array:
+    def demodulated_msg_bits(self) -> np.array:
         cor_arr = np.array([], dtype='float')
         for shift in range(len(self.m_code)):
             cor_arr = np.append(cor_arr, self._get_corr(shift))
 
         code_offset = int(np.where(cor_arr == np.max(cor_arr))[0])
         message = self._get_msg_from_offset(code_offset)
-        msg_bit_expans = int(np.ceil(len(self.m_code) / len(message)))
-        message = np.repeat(message, self.expans * msg_bit_expans)
+
+        return message
+
+    @property
+    def demodulated_msg_bits_exp(self) -> np.array:
+        msg_bit_expans = int(
+            np.ceil(
+                len(self.m_code) / len(self.demodulated_msg_bits)
+            )
+        )
+        message = np.repeat(self.demodulated_msg_bits,
+                            self.expans * msg_bit_expans)
 
         return message[:len(self.m_code_exp)]
 
@@ -90,7 +101,8 @@ class CskModulator:
                           step=tau_chip_exp,
                           stop=len(mod_arr_exp) * tau_chip_exp)
 
-        return CskSignalTdomain(modulated_code=mod_arr,
+        return CskSignalTdomain(input_msg_bits=message,
+                                modulated_code=mod_arr,
                                 m_code=self.code.m_code,
                                 m_code_exp=self.code.m_code_exp,
                                 msg_bits=msg_bits,
@@ -114,6 +126,5 @@ class CskModulator:
         signal = signal_amp * signal
         noise = np.random.normal(0, 1, len(signal))
         noisy_signal = signal + noise
+
         return noisy_signal
-
-
