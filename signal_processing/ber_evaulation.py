@@ -30,7 +30,7 @@ def evaulate_ber_for_db_value(snr_db: float):
     m_code_gen = McodeGenerator()
     m_code_t_domain = m_code_gen.get_m_code_t_domain()
 
-    runs_count = 10_000
+    runs_count = 5_000
     err_bits_count = 0
     bits_count = len(message) * runs_count
 
@@ -63,7 +63,7 @@ def _pack_results(results: list[BerResult]) -> BerResults:
 
 @evaulation_time_count
 def get_ber_results() -> BerResults:
-    snr_db_vals = [db for db in range(-15, 10)]
+    snr_db_vals = np.arange(start=-20, step=0.5, stop=0)
 
     with Pool(cpu_count()) as p:
         results = list(p.map(evaulate_ber_for_db_value, snr_db_vals))
