@@ -1,16 +1,24 @@
 import numpy as np
 
-from dash import dcc, Input, Output
+from dash import dcc, Dash, Input, Output
+from diskcache import Cache
 
-from signal_processing import McodeGenerator, CskModulator
+from signal_processing import (
+    BerResults,
+    CskModulator,
+    McodeGenerator,
+    get_ber_results,
+)
 from figures import (
     get_m_code_t_domain_figure,
     get_csk_code_t_domain_figure,
+    get_csk_code_ber_figure,
 )
-from utils import HtmlDivRegister, AppContainer
+from utils import AppContainer, HtmlDivRegister
 
 
-app = AppContainer().app
+app: Dash = AppContainer().app
+cache: Cache = AppContainer().cache
 
 
 @HtmlDivRegister()
@@ -53,3 +61,14 @@ def update_csk_code(snr_db: float):
     fig.update_layout(transition_duration=500)
 
     return fig
+
+
+@ HtmlDivRegister()
+def show_csk_ber() -> dcc.Graph:
+    cache_decorator = cache.memoize()
+    get_ber_results_decorated = cache_decorator(get_ber_results)
+    ber_results: BerResults = get_ber_results_decorated()
+
+    fig = get_csk_code_ber_figure(ber_results)
+
+    return dcc.Graph(figure=fig)

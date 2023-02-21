@@ -1,6 +1,7 @@
+import diskcache as dc
 from dash import Dash, html
 
-from utils import HtmlDivRegister, AppContainer
+from utils import AppContainer, HtmlDivRegister
 
 
 def init_views():
@@ -10,7 +11,7 @@ def init_views():
 
 
 def init_app(app: Dash):
-    AppContainer(app)
+    AppContainer(app, dc.Cache(directory='.cache'))
     init_views()
 
 
