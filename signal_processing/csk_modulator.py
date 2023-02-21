@@ -7,6 +7,7 @@ from signal_processing.m_code_generator import McodeTdomain
 
 @dataclass
 class CskSignalTdomain:
+    input_msg_bits: np.array
     modulated_code: np.array
     m_code: np.array
     msg_bits: np.array
@@ -21,15 +22,25 @@ class CskSignalTdomain:
         return int(len(self.m_code_exp) / len(self.m_code))
 
     @property
-    def demodulated_msg_bits_exp(self) -> np.array:
+    def demodulated_msg_bits(self) -> np.array:
         cor_arr = np.array([], dtype='float')
         for shift in range(len(self.m_code)):
             cor_arr = np.append(cor_arr, self._get_corr(shift))
 
         code_offset = int(np.where(cor_arr == np.max(cor_arr))[0])
         message = self._get_msg_from_offset(code_offset)
-        msg_bit_expans = int(np.ceil(len(self.m_code) / len(message)))
-        message = np.repeat(message, self.expans * msg_bit_expans)
+
+        return message
+
+    @property
+    def demodulated_msg_bits_exp(self) -> np.array:
+        msg_bit_expans = int(
+            np.ceil(
+                len(self.m_code) / len(self.demodulated_msg_bits)
+            )
+        )
+        message = np.repeat(self.demodulated_msg_bits,
+                            self.expans * msg_bit_expans)
 
         return message[:len(self.m_code_exp)]
 
@@ -38,16 +49,13 @@ class CskSignalTdomain:
                              bin(offset).replace('0b', '')],
                             dtype='int')
         if msg_bits.shape[0] < self.msg_bits_count:
-            insert_bits_count = self.msg_bits_count - msg_bits.shape[0] + 1
 
-            # Данное условие позволяет избежать ошибок при низком отношении
-            # сигнал-шум.
-            if insert_bits_count > 3:
-                insert_bits_count = 3
+            insert_bits_count = self.msg_bits_count - msg_bits.shape[0]
 
             msg_bits = np.insert(
-                msg_bits,
-                *(0 for _ in range(insert_bits_count))
+                arr=msg_bits,
+                obj=0,
+                values=[0 for _ in range(insert_bits_count)],
             )
         return msg_bits
 
@@ -90,12 +98,13 @@ class CskModulator:
                           step=tau_chip_exp,
                           stop=len(mod_arr_exp) * tau_chip_exp)
 
-        return CskSignalTdomain(modulated_code=mod_arr,
+        return CskSignalTdomain(input_msg_bits=message,
+                                modulated_code=mod_arr,
                                 m_code=self.code.m_code,
                                 m_code_exp=self.code.m_code_exp,
                                 msg_bits=msg_bits,
                                 msg_bits_exp=msg_bits_exp,
-                                msg_bits_count=self.code.n,
+                                msg_bits_count=len(message),
                                 modulated_code_exp=mod_arr_exp,
                                 t_arr=t_arr)
 
@@ -114,6 +123,5 @@ class CskModulator:
         signal = signal_amp * signal
         noise = np.random.normal(0, 1, len(signal))
         noisy_signal = signal + noise
+
         return noisy_signal
-
-

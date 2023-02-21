@@ -1,5 +1,9 @@
 import plotly.express as px
-from signal_processing import CskSignalTdomain, McodeTdomain
+from signal_processing import (
+    BerResults,
+    CskSignalTdomain,
+    McodeTdomain,
+)
 
 
 def get_m_code_t_domain_figure(m_code_t_domain: McodeTdomain):
@@ -11,6 +15,7 @@ def get_m_code_t_domain_figure(m_code_t_domain: McodeTdomain):
                   title="M-последовательность во временной области",
                   height=500, width=1400)
     return fig
+
 
 def get_csk_code_t_domain_figure(csk_code_t_domain: CskSignalTdomain):
     df = {'Input Message': csk_code_t_domain.msg_bits_exp,
@@ -29,5 +34,16 @@ def get_csk_code_t_domain_figure(csk_code_t_domain: CskSignalTdomain):
     fig.data[demodulated_msg_line_idx].update(line={'width': 5})
     csk_line_idx = 2
     fig.data[csk_line_idx].update(line={'width': .5})
+
+    return fig
+
+
+def get_csk_code_ber_figure(ber_results: BerResults):
+    df = {'BER': ber_results.ber_arr,
+          'SNR dB': ber_results.snr_db_arr}
+    fig = px.line(df, x='SNR dB',
+                  y='BER', log_y=True,
+                  title='Вероятность ошибки на бит',
+                  height=600, width=600)
 
     return fig
