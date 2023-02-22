@@ -65,9 +65,7 @@ def update_csk_code(snr_db: float):
 
 @ HtmlDivRegister()
 def show_csk_ber() -> dcc.Graph:
-    cache_decorator = cache.memoize()
-    get_ber_results_decorated = cache_decorator(get_ber_results)
-    ber_results: BerResults = get_ber_results_decorated()
+    ber_results: BerResults = get_ber_results()
 
     fig = get_csk_code_ber_figure(ber_results)
 

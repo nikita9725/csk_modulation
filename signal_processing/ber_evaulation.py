@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from multiprocessing import cpu_count, Pool
 
 from signal_processing import CskModulator, McodeGenerator
-from utils import evaulation_time_count
+from utils import disk_cache, evaulation_time_count
 
 
 @dataclass
@@ -61,6 +61,7 @@ def _pack_results(results: list[BerResult]) -> BerResults:
     return ber_results
 
 
+@disk_cache
 @evaulation_time_count
 def get_ber_results() -> BerResults:
     snr_db_vals = np.arange(start=-20, step=0.5, stop=0)
