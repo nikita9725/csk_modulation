@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from multiprocessing import cpu_count, Pool
 
 from const import MessageParams
-from signal_processing import CskModulator, McodeGenerator
+from signal_processing import CskModulator
 from utils import disk_cache, evaulation_time_count
 
 

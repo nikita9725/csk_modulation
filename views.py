@@ -1,5 +1,3 @@
-import numpy as np
-
 from dash import dcc, Dash, Input, Output
 from diskcache import Cache
 
