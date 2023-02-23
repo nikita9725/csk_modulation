@@ -51,10 +51,7 @@ def show_csk_snr_slider() -> dcc.Slider:
     Output('csk-graph-snr-slider', 'figure'),
     Input('snr-slider', 'value'))
 def update_csk_code(snr_db: float):
-    m_code_gen = McodeGenerator()
-    m_code_t_domain = m_code_gen.get_m_code_t_domain()
-
-    csk_modulatior = CskModulator(m_code_t_domain, snr_db)
+    csk_modulatior = CskModulator(snr_db)
     message = MessageParams.MESSAGE
     csk_t_domain = csk_modulatior.modulate_t_domain(message)
     fig = get_csk_code_t_domain_figure(csk_t_domain)

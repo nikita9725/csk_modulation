@@ -4,7 +4,7 @@ from operator import mod
 from dataclasses import dataclass
 
 from .base import ModulatorBase, SignalTdomainBase
-from signal_processing.m_code_generator import McodeTdomain
+from signal_processing.m_code_generator import McodeGenerator
 
 
 @dataclass
@@ -72,8 +72,8 @@ class CskSignalTdomain(SignalTdomainBase):
 
 
 class CskModulator(ModulatorBase):
-    def __init__(self, code_t_domain: McodeTdomain, snr_db: float):
-        self.code = code_t_domain
+    def __init__(self, snr_db: float):
+        self.code = McodeGenerator().get_m_code_t_domain()
         self.snr_db = snr_db
 
     def modulate(self, message):

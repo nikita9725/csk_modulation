@@ -28,16 +28,12 @@ class BerResult:
 def evaulate_ber_for_db_value(snr_db: float):
     message = MessageParams.MESSAGE
 
-    m_code_gen = McodeGenerator()
-    m_code_t_domain = m_code_gen.get_m_code_t_domain()
-
     runs_count = 5_000
     err_bits_count = 0
     bits_count = len(message) * runs_count
 
     for _ in range(runs_count):
-        csk_modulator = CskModulator(code_t_domain=m_code_t_domain,
-                                     snr_db=snr_db)
+        csk_modulator = CskModulator(snr_db=snr_db)
         csk_t_domain = csk_modulator.modulate_t_domain(message)
 
         err_bits_count += sum(
