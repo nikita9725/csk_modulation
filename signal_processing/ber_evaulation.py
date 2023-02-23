@@ -3,6 +3,7 @@ import numpy as np
 from dataclasses import dataclass
 from multiprocessing import cpu_count, Pool
 
+from const import MessageParams
 from signal_processing import CskModulator, McodeGenerator
 from utils import disk_cache, evaulation_time_count
 
@@ -25,7 +26,7 @@ class BerResult:
 
 
 def evaulate_ber_for_db_value(snr_db: float):
-    message = np.array((0, 1, 0, 1, 0, 1, 0, 1, 0), dtype='int')
+    message = MessageParams.MESSAGE
 
     m_code_gen = McodeGenerator()
     m_code_t_domain = m_code_gen.get_m_code_t_domain()

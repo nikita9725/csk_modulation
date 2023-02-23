@@ -3,6 +3,7 @@ import numpy as np
 from dash import dcc, Dash, Input, Output
 from diskcache import Cache
 
+from const import MessageParams
 from signal_processing import (
     BerResults,
     CskModulator,
@@ -54,7 +55,7 @@ def update_csk_code(snr_db: float):
     m_code_t_domain = m_code_gen.get_m_code_t_domain()
 
     csk_modulatior = CskModulator(m_code_t_domain, snr_db)
-    message = np.array((0, 1, 0, 1, 0, 1, 0, 1 ,0), dtype='int')
+    message = MessageParams.MESSAGE
     csk_t_domain = csk_modulatior.modulate_t_domain(message)
     fig = get_csk_code_t_domain_figure(csk_t_domain)
 
