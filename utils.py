@@ -42,3 +42,16 @@ def evaulation_time_count(func):
         return result
 
     return inner
+
+
+def disk_cache(func):
+    cache: Cache = AppContainer().cache
+
+    def inner(*args, **kwargs):
+        cache_decoator = cache.memoize()
+        decorated_func = cache_decoator(func)
+        result = decorated_func()
+
+        return result
+
+    return inner

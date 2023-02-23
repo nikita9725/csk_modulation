@@ -3,8 +3,9 @@ import numpy as np
 from dataclasses import dataclass
 from multiprocessing import cpu_count, Pool
 
+from const import MessageParams
 from signal_processing import CskModulator, McodeGenerator
-from utils import evaulation_time_count
+from utils import disk_cache, evaulation_time_count
 
 
 @dataclass
@@ -25,18 +26,14 @@ class BerResult:
 
 
 def evaulate_ber_for_db_value(snr_db: float):
-    message = np.array((0, 1, 0, 1, 0, 1, 0, 1, 0), dtype='int')
-
-    m_code_gen = McodeGenerator()
-    m_code_t_domain = m_code_gen.get_m_code_t_domain()
+    message = MessageParams.MESSAGE
 
     runs_count = 5_000
     err_bits_count = 0
     bits_count = len(message) * runs_count
 
     for _ in range(runs_count):
-        csk_modulator = CskModulator(code_t_domain=m_code_t_domain,
-                                     snr_db=snr_db)
+        csk_modulator = CskModulator(snr_db=snr_db)
         csk_t_domain = csk_modulator.modulate_t_domain(message)
 
         err_bits_count += sum(
@@ -61,6 +58,7 @@ def _pack_results(results: list[BerResult]) -> BerResults:
     return ber_results
 
 
+@disk_cache
 @evaulation_time_count
 def get_ber_results() -> BerResults:
     snr_db_vals = np.arange(start=-20, step=0.5, stop=0)

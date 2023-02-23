@@ -2,11 +2,13 @@ import numpy as np
 from numpy.fft import fftshift, ifftshift
 from operator import mod
 from dataclasses import dataclass
-from signal_processing.m_code_generator import McodeTdomain
+
+from .base import ModulatorBase, SignalTdomainBase
+from signal_processing.m_code_generator import McodeGenerator
 
 
 @dataclass
-class CskSignalTdomain:
+class CskSignalTdomain(SignalTdomainBase):
     input_msg_bits: np.array
     modulated_code: np.array
     m_code: np.array
@@ -69,9 +71,9 @@ class CskSignalTdomain:
         return np.sum(corr_arr)
 
 
-class CskModulator:
-    def __init__(self, code_t_domain: McodeTdomain, snr_db: float):
-        self.code = code_t_domain
+class CskModulator(ModulatorBase):
+    def __init__(self, snr_db: float):
+        self.code = McodeGenerator().get_m_code_t_domain()
         self.snr_db = snr_db
 
     def modulate(self, message):

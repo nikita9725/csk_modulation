@@ -3,6 +3,7 @@ import numpy as np
 from dash import dcc, Dash, Input, Output
 from diskcache import Cache
 
+from const import MessageParams
 from signal_processing import (
     BerResults,
     CskModulator,
@@ -50,11 +51,8 @@ def show_csk_snr_slider() -> dcc.Slider:
     Output('csk-graph-snr-slider', 'figure'),
     Input('snr-slider', 'value'))
 def update_csk_code(snr_db: float):
-    m_code_gen = McodeGenerator()
-    m_code_t_domain = m_code_gen.get_m_code_t_domain()
-
-    csk_modulatior = CskModulator(m_code_t_domain, snr_db)
-    message = np.array((0, 1, 0, 1, 0, 1, 0, 1 ,0), dtype='int')
+    csk_modulatior = CskModulator(snr_db)
+    message = MessageParams.MESSAGE
     csk_t_domain = csk_modulatior.modulate_t_domain(message)
     fig = get_csk_code_t_domain_figure(csk_t_domain)
 
@@ -65,9 +63,7 @@ def update_csk_code(snr_db: float):
 
 @ HtmlDivRegister()
 def show_csk_ber() -> dcc.Graph:
-    cache_decorator = cache.memoize()
-    get_ber_results_decorated = cache_decorator(get_ber_results)
-    ber_results: BerResults = get_ber_results_decorated()
+    ber_results: BerResults = get_ber_results()
 
     fig = get_csk_code_ber_figure(ber_results)
 
