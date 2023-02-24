@@ -1,9 +1,17 @@
 import diskcache as dc
 import click
+import os
 
 from dash import Dash, html
 
+from const import CacheParams
 from utils import AppContainer, HtmlDivRegister
+
+
+def flush_cache_func():
+    cache_dir = CacheParams.CACHE_DIR
+    for file in os.listdir(cache_dir):
+        os.remove(os.path.join(cache_dir, file))
 
 
 def init_views():
@@ -13,7 +21,8 @@ def init_views():
 
 
 def init_app(app: Dash):
-    AppContainer(app, dc.Cache(directory='.cache'))
+    cache_dir = CacheParams.CACHE_DIR
+    AppContainer(app, dc.Cache(directory=cache_dir))
     init_views()
 
 
@@ -21,13 +30,12 @@ def init_app(app: Dash):
 @click.option('--flush-cache', is_flag=True, default=False,
               help='Starting app with this flag flushes disk cache.')
 def start_app(flush_cache: bool):
+    if flush_cache is True:
+        flush_cache_func()
+
     app = Dash(__name__)
     init_app(app)
     app.layout = html.Div(HtmlDivRegister().divs)
-
-    if flush_cache is True:
-        cache: dc.Cache = AppContainer().cache
-        cache.clear()
 
     app.run_server(debug=True)
 

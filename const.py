@@ -9,3 +9,11 @@ class McodeParams:
 
 class MessageParams:
     MESSAGE = np.array((0, 1, 0, 1, 0, 1, 0, 1 ,0), dtype='int')
+
+
+class BerEvaulationParams:
+    RUNS_COUNT = 1_000
+
+
+class CacheParams:
+    CACHE_DIR = '.cache'
