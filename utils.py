@@ -2,6 +2,7 @@ from diskcache import Cache
 from typing import Optional
 from dash import Dash
 from datetime import datetime
+from functools import partial, wraps
 
 
 class SingletonMeta(type):
@@ -49,7 +50,11 @@ def disk_cache(func):
 
     def inner(*args, **kwargs):
         cache_decoator = cache.memoize()
-        decorated_func = cache_decoator(func)
+        decorated_func = cache_decoator(
+            wraps(func)(
+                partial(func, *args, **kwargs)
+            )
+        )
         result = decorated_func()
 
         return result
