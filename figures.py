@@ -38,11 +38,13 @@ def get_csk_code_t_domain_figure(csk_code_t_domain: CskSignalTdomain):
     return fig
 
 
-def get_csk_code_ber_figure(ber_results: BerResults):
-    df = {'BER': ber_results.ber_arr,
+def get_csk_code_ber_figure(ber_results: BerResults,
+                            bpsk_ber: BerResults):
+    df = {'CSK BER': ber_results.ber_arr,
+          'BPSK BER': bpsk_ber.ber_arr,
           'SNR dB': ber_results.snr_db_arr}
     fig = px.line(df, x='SNR dB',
-                  y='BER', log_y=True,
+                  y=['CSK BER', 'BPSK BER'], log_y=True,
                   title='Вероятность ошибки на бит',
                   height=600, width=600)
 

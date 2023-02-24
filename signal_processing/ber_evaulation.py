@@ -1,9 +1,10 @@
 import numpy as np
 
 from dataclasses import dataclass
+from math import erfc
 from multiprocessing import cpu_count, Pool
 
-from const import MessageParams
+from const import BerEvaulationParams, MessageParams
 from signal_processing import CskModulator
 from utils import disk_cache, evaulation_time_count
 
@@ -25,7 +26,22 @@ class BerResult:
         return self.err_bits_count / self.bits_count
 
 
-def evaulate_ber_for_db_value(snr_db: float):
+def get_bpsk_theory_ber(snr_db_arr: np.array) -> BerResults:
+    ber_arr = np.array(
+        [_get_bpsk_theory_ber_for_db_value(snr_db) for snr_db in snr_db_arr],
+        dtype='float',
+    )
+
+    return BerResults(snr_db_arr, ber_arr)
+
+
+def _get_bpsk_theory_ber_for_db_value(snr_db: float) -> float:
+    amp = 10 ** (snr_db / 20)
+
+    return 0.5 * erfc(np.sqrt(amp))
+
+
+def evaulate_ber_for_db_value(snr_db: float) -> BerResult:
     message = MessageParams.MESSAGE
 
     runs_count = BerEvaulationParams.RUNS_COUNT

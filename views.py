@@ -1,12 +1,14 @@
+import numpy as np
+
 from dash import dcc, Dash, Input, Output
 from diskcache import Cache
 
 from const import MessageParams
 from signal_processing import (
-    BerResults,
     CskModulator,
     McodeGenerator,
     get_ber_results,
+    get_bpsk_theory_ber,
 )
 from figures import (
     get_m_code_t_domain_figure,
@@ -65,6 +67,6 @@ def show_csk_ber() -> dcc.Graph:
     ber_results = get_ber_results(snr_db_arr)
     bpsk_ber = get_bpsk_theory_ber(snr_db_arr)
 
-    fig = get_csk_code_ber_figure(ber_results)
+    fig = get_csk_code_ber_figure(ber_results, bpsk_ber)
 
     return dcc.Graph(figure=fig)
