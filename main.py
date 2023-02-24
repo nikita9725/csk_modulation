@@ -13,7 +13,8 @@ def init_views():
 
 
 def init_app(app: Dash):
-    AppContainer(app, dc.Cache(directory='.cache'))
+    cache_dir = CacheParams.CACHE_DIR
+    AppContainer(app, dc.Cache(directory=cache_dir))
     init_views()
 
 
