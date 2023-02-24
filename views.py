@@ -61,7 +61,9 @@ def update_csk_code(snr_db: float):
 
 @ HtmlDivRegister()
 def show_csk_ber() -> dcc.Graph:
-    ber_results: BerResults = get_ber_results()
+    snr_db_arr = np.arange(start=-20, step=0.5, stop=12)
+    ber_results = get_ber_results(snr_db_arr)
+    bpsk_ber = get_bpsk_theory_ber(snr_db_arr)
 
     fig = get_csk_code_ber_figure(ber_results)
 

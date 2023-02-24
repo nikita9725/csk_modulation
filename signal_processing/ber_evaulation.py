@@ -28,7 +28,7 @@ class BerResult:
 def evaulate_ber_for_db_value(snr_db: float):
     message = MessageParams.MESSAGE
 
-    runs_count = 5_000
+    runs_count = BerEvaulationParams.RUNS_COUNT
     err_bits_count = 0
     bits_count = len(message) * runs_count
 
@@ -60,10 +60,8 @@ def _pack_results(results: list[BerResult]) -> BerResults:
 
 @disk_cache
 @evaulation_time_count
-def get_ber_results() -> BerResults:
-    snr_db_vals = np.arange(start=-20, step=0.5, stop=0)
-
+def get_ber_results(snr_db_arr: np.array) -> BerResults:
     with Pool(cpu_count()) as p:
-        results = list(p.map(evaulate_ber_for_db_value, snr_db_vals))
+        results = list(p.map(evaulate_ber_for_db_value, snr_db_arr))
 
     return _pack_results(results)
