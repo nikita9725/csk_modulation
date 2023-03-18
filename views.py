@@ -66,8 +66,6 @@ def show_csk_speed_slider() -> dcc.Slider:
 def update_csk_code(snr_db: float, bit_rate: float):
     t_period = len(McodeParams.START_BITS) / bit_rate
 
-    print(f'Период последовтельности: {t_period}')
-
     csk_modulatior = CskModulator(snr_db, t_period)
     message = MessageParams.MESSAGE
     csk_t_domain = csk_modulatior.modulate_t_domain(message)
@@ -81,9 +79,11 @@ def update_csk_code(snr_db: float, bit_rate: float):
 @HtmlDivRegister()
 def show_csk_ber() -> dcc.Graph:
     snr_db_arr = np.arange(start=-20, step=0.5, stop=12)
-    ber_results = get_ber_results(snr_db_arr)
+    bit_rate_list = [9e3, 1e5, 3e6]
+
+    ber_results = get_ber_results(snr_db_arr, bit_rate_list)
     bpsk_ber = get_bpsk_theory_ber(snr_db_arr)
 
-    fig = get_csk_code_ber_figure(ber_results, bpsk_ber)
+    fig = get_csk_code_ber_figure(ber_results, bpsk_ber, snr_db_arr)
 
     return dcc.Graph(figure=fig)

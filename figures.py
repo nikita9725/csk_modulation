@@ -1,4 +1,6 @@
+import numpy as np
 import plotly.express as px
+from humanize import naturalsize
 from signal_processing import (
     BerResults,
     CskSignalTdomain,
@@ -38,13 +40,19 @@ def get_csk_code_t_domain_figure(csk_code_t_domain: CskSignalTdomain):
     return fig
 
 
-def get_csk_code_ber_figure(ber_results: BerResults,
-                            bpsk_ber: BerResults):
-    df = {'CSK BER': ber_results.ber_arr,
-          'BPSK BER': bpsk_ber.ber_arr,
-          'SNR dB': ber_results.snr_db_arr}
+def get_csk_code_ber_figure(ber_results_list: list[BerResults],
+                            bpsk_ber: BerResults,
+                            snr_db_arr: np.array):
+    csk_ber_df = {
+        f'CSK BER {naturalsize(ber_result.bit_rate)}it/s':
+            ber_result.ber_arr
+        for ber_result in ber_results_list
+    }
+    df = {'BPSK BER': bpsk_ber.ber_arr,
+          **csk_ber_df,
+          'SNR dB': snr_db_arr}
     fig = px.line(df, x='SNR dB',
-                  y=['CSK BER', 'BPSK BER'], log_y=True,
+                  y=[*(csk_ber_df.keys()), 'BPSK BER'], log_y=True,
                   title='Вероятность ошибки на бит',
                   height=600, width=600)
 

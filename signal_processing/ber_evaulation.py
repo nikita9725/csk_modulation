@@ -3,8 +3,9 @@ import numpy as np
 from dataclasses import dataclass
 from math import erfc
 from multiprocessing import cpu_count, Pool
+from typing import Optional
 
-from const import BerEvaulationParams, MessageParams
+from const import BerEvaulationParams, McodeParams, MessageParams
 from signal_processing import CskModulator
 from utils import disk_cache, evaulation_time_count
 
@@ -13,6 +14,7 @@ from utils import disk_cache, evaulation_time_count
 class BerResults:
     snr_db_arr: np.array
     ber_arr: np.array
+    bit_rate: Optional[float]
 
 
 @dataclass
@@ -32,7 +34,7 @@ def get_bpsk_theory_ber(snr_db_arr: np.array) -> BerResults:
         dtype='float',
     )
 
-    return BerResults(snr_db_arr, ber_arr)
+    return BerResults(snr_db_arr, ber_arr, None)
 
 
 def _get_bpsk_theory_ber_for_db_value(snr_db: float) -> float:
@@ -41,15 +43,17 @@ def _get_bpsk_theory_ber_for_db_value(snr_db: float) -> float:
     return 0.5 * erfc(np.sqrt(amp))
 
 
-def evaulate_ber_for_db_value(snr_db: float) -> BerResult:
+def evaulate_ber_for_db_value(snr_db: float, bit_rate: float) -> BerResult:
     message = MessageParams.MESSAGE
 
     runs_count = BerEvaulationParams.RUNS_COUNT
     err_bits_count = 0
     bits_count = len(message) * runs_count
 
+    t_period = len(McodeParams.START_BITS) / bit_rate
+
     for _ in range(runs_count):
-        csk_modulator = CskModulator(snr_db=snr_db)
+        csk_modulator = CskModulator(snr_db=snr_db, t_period=t_period)
         csk_t_domain = csk_modulator.modulate_t_domain(message)
 
         err_bits_count += sum(
@@ -59,7 +63,7 @@ def evaulate_ber_for_db_value(snr_db: float) -> BerResult:
     return BerResult(bits_count, err_bits_count, snr_db)
 
 
-def _pack_results(results: list[BerResult]) -> BerResults:
+def _pack_results(results: list[BerResult], bit_rate: float) -> BerResults:
     results.sort(key=lambda ber_result: ber_result.snr_db)
 
     snr_db_arr = np.array([], dtype='float')
@@ -69,15 +73,22 @@ def _pack_results(results: list[BerResult]) -> BerResults:
         snr_db_arr = np.append(snr_db_arr, result.snr_db)
         ber_arr = np.append(ber_arr, result.ber)
 
-    ber_results = BerResults(snr_db_arr, ber_arr)
+    ber_results = BerResults(snr_db_arr, ber_arr, bit_rate)
 
     return ber_results
 
 
 @disk_cache
 @evaulation_time_count
-def get_ber_results(snr_db_arr: np.array) -> BerResults:
-    with Pool(cpu_count()) as p:
-        results = list(p.map(evaulate_ber_for_db_value, snr_db_arr))
+def get_ber_results(snr_db_arr: np.array,
+                    bit_rate_list: list[float]) -> list[BerResults]:
 
-    return _pack_results(results)
+    ber_results_list = []
+    for bit_rate in bit_rate_list:
+        with Pool(cpu_count()) as p:
+            bit_rate_arg_list = [bit_rate for _ in snr_db_arr]
+            results = [*p.starmap(evaulate_ber_for_db_value,
+                                  zip(snr_db_arr, bit_rate_arg_list))]
+        ber_results_list.append(_pack_results(results, bit_rate))
+
+    return ber_results_list
