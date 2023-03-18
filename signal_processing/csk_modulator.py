@@ -73,7 +73,7 @@ class CskSignalTdomain(SignalTdomainBase):
 
 
 class CskModulator(ModulatorBase):
-    def __init__(self, snr_db: float, t_period: Optional[float]):
+    def __init__(self, snr_db: float, t_period: float|None):
         self.code = McodeGenerator(t_period=t_period).get_m_code_t_domain()
         self.snr_db = snr_db
 

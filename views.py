@@ -3,7 +3,7 @@ import numpy as np
 from dash import dcc, Dash, Input, Output
 from diskcache import Cache
 
-from const import MessageParams
+from const import McodeParams, MessageParams
 from signal_processing import (
     CskModulator,
     McodeGenerator,
@@ -47,11 +47,28 @@ def show_csk_snr_slider() -> dcc.Slider:
                       tooltip={"placement": "top"})
 
 
+@HtmlDivRegister()
+def show_csk_snr_slider_label() -> str:
+    return 'Bit rate bit/s'
+
+
+@HtmlDivRegister()
+def show_csk_speed_slider() -> dcc.Slider:
+    return dcc.Slider(min=9e3, max=3e6, step=100e3, value=9e3, id='speed-slider',
+                      tooltip={"placement": "top"})
+
+
 @app.callback(
     Output('csk-graph-snr-slider', 'figure'),
-    Input('snr-slider', 'value'))
-def update_csk_code(snr_db: float):
-    csk_modulatior = CskModulator(snr_db)
+    [Input('snr-slider', 'value'),
+     Input('speed-slider', 'value')]
+)
+def update_csk_code(snr_db: float, bit_rate: float):
+    t_period = len(McodeParams.START_BITS) / bit_rate
+
+    print(f'Период последовтельности: {t_period}')
+
+    csk_modulatior = CskModulator(snr_db, t_period)
     message = MessageParams.MESSAGE
     csk_t_domain = csk_modulatior.modulate_t_domain(message)
     fig = get_csk_code_t_domain_figure(csk_t_domain)
