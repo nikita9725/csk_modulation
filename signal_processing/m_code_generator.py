@@ -2,6 +2,7 @@ import numpy as np
 from dataclasses import dataclass
 from math import ceil
 from functools import cache
+from typing import Optional
 
 from const import McodeParams
 
@@ -31,9 +32,9 @@ class McodeTdomain:
 
 
 class McodeGenerator:
-    def __init__(self):
+    def __init__(self, t_period: Optional[float] = None):
         self.start_bits = McodeParams.START_BITS
-        self.t_period = McodeParams.T_PERIOD
+        self.t_period = t_period if t_period else McodeParams.T_PERIOD
 
         # Расширение кодовой последовательности
         self.expans = McodeParams.EXPANS
@@ -58,7 +59,6 @@ class McodeGenerator:
 
         return m_code
 
-    @cache
     def get_m_code_t_domain(self) -> McodeTdomain:
         m_code = self.generate_m_code()
         tau_chip = self.t_period / len(m_code)
