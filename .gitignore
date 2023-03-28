@@ -139,3 +139,7 @@ cython_debug/
 
 # PyCharm files
 /.idea
+
+# tmp cache files
+*.db-shm
+*.db-wal

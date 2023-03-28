@@ -2,6 +2,7 @@ import numpy as np
 from numpy.fft import fftshift, ifftshift
 from operator import mod
 from dataclasses import dataclass
+from typing import Optional
 
 from .base import ModulatorBase, SignalTdomainBase
 from signal_processing.m_code_generator import McodeGenerator
@@ -72,8 +73,8 @@ class CskSignalTdomain(SignalTdomainBase):
 
 
 class CskModulator(ModulatorBase):
-    def __init__(self, snr_db: float):
-        self.code = McodeGenerator().get_m_code_t_domain()
+    def __init__(self, snr_db: float, t_period: float|None):
+        self.code = McodeGenerator(t_period=t_period).get_m_code_t_domain()
         self.snr_db = snr_db
 
     def modulate(self, message):
