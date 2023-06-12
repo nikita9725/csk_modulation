@@ -35,7 +35,7 @@ def get_csk_code_t_domain_figure(csk_code_t_domain: CskSignalTdomain):
     demodulated_msg_line_idx = 1
     fig.data[demodulated_msg_line_idx].update(line={'width': 5})
     csk_line_idx = 2
-    fig.data[csk_line_idx].update(line={'width': .5})
+    fig.data[csk_line_idx].update(line={'width': .1})
 
     return fig
 
